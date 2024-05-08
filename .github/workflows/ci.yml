@@ -6,16 +6,17 @@ name: Test and Publish WebAPi Container Image
 on:
   push:
     branches: [ "main" ]
-    tags: [ "v1*" ]
+    tags: ["v1*"]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:  {} # allow manually trigger workflow
+
 jobs:
 
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
     - name: Get Go version from go.mod
       id: get_go_version
@@ -29,7 +30,7 @@ jobs:
     - name: Generate api controllers interfaces
       uses: craicoverflow/openapi-generator-generate-action@v1.2.1
       with:
-        # version: 7.0.0-beta - at time of writing this text only prerelease was available
+        version: 7.4.0
         generator: go-gin-server
         input: api/premises-wl.openapi.yaml
         additional-properties: apiPath=internal/premises_wl,packageName=premises_wl
@@ -40,7 +41,7 @@ jobs:
 
     - name: Docker Setup QEMU
       uses: docker/setup-qemu-action@v2.2.0
-        
+
     - name: Docker Setup Buildx
       uses: docker/setup-buildx-action@v2.9.1
 
