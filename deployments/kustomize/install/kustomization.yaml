@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- deployment.yaml
+- service.yaml
+
+configMapGenerator:
+  - name: vecnehladny-premises-webapi-mongodb-init
+    files:
+      - params/init-db.js
+  - name: vecnehladny-premises-webapi-config
+    literals:
+      - database=vecnehladny-premises
+      - collection=premises
+patches:
+ - path: patches/webapi.deployment.yaml
+   target:
+     group: apps
+     version: v1
+     kind: Deployment
+     name: vecnehladny-premises-webapi
