@@ -48,7 +48,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5.5.1
       with:
-        images: vecnehladny/premises-wl-webapi
+        images: vecnehladny/premises-webapi
         tags: |
             type=schedule
             type=ref,event=branch
