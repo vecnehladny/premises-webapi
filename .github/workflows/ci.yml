@@ -39,7 +39,7 @@ jobs:
       run: go build -v ./cmd/premises-api-service
 
     - name: Docker Setup QEMU
-      uses: docker/setup-qemu-action@v3.3.0
+      uses: docker/setup-qemu-action@v3.0.0
 
     - name: Docker Setup Buildx
       uses: docker/setup-buildx-action@v3.3.0
