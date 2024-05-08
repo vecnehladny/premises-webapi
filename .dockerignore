@@ -1,0 +1,5 @@
+internal/premises_wl/api_*
+internal/premises_wl/model_*
+internal/premises_wl/routers.go
+build/
+deployments/
