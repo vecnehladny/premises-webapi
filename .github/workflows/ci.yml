@@ -69,9 +69,10 @@ jobs:
     - name: Build and push Docker images
       uses: docker/build-push-action@v5.3.0
       with:
-        #context: ${{ github.workspace }}
-        file: ${{ github.workspace }}/build/docker/Dockerfile
+        #context: .
+        #file: ./build/docker/Dockerfile
         labels: ${{ steps.meta.outputs.labels }}
         platforms: linux/amd64,linux/arm64/v8
         push: true
         tags: ${{ steps.meta.outputs.tags }}
+    
