@@ -1,0 +1,229 @@
+openapi: 3.0.3
+servers:
+  - description: Hospital Endpoint
+    url: /api
+info:
+  description: Hospital Room List management for Web-In-Cloud system
+  version: "1.0.0"
+  title: Room List API
+  contact:
+    email: pfx@google.com
+  license:
+    name: CC BY 4.0
+    url: "https://creativecommons.org/licenses/by/4.0/"
+tags:
+- name: roomsList
+  description: Hospital Room List API
+- name: roomConditions
+  description: Room conditions and statuses handled in the hospital
+paths:
+  "/rooms-list/{buildingId}/rooms":
+    get:
+      tags:
+        - roomsList
+      summary: Provides the room list for a specific building
+      operationId: getRoomList
+      description: By using buildingId, you get a list of rooms in a specific building
+      parameters:
+        - in: path
+          name: buildingId
+          description: Pass the ID of the particular building
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Value of the room list entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoomEntry"
+              examples:
+                response:
+                  $ref: "#/components/examples/RoomListEntriesExample"
+        "404":
+          description: Building with such ID does not exist
+    post:
+      tags:
+        - roomsList
+      summary: Saves new room into room list
+      operationId: createRoomEntry
+      description: Use this method to store new room into the room list.
+      parameters:
+        - in: path
+          name: buildingId
+          description: Pass the ID of the particular building
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomEntry"
+            examples:
+              request-sample: 
+                $ref: "#/components/examples/RoomEntryExample"
+        description: Room entry to store
+        required: true
+      responses:
+        "200":
+          description: Value of the room entry with re-computed estimated occupancy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomEntry"
+              examples:
+                updated-response: 
+                  $ref: "#/components/examples/RoomEntryExample"
+        "400":
+          description: Missing mandatory properties of input object.
+        "404":
+          description: Building with such ID does not exist
+        "409":
+          description: Room with the specified id already exists
+  "/rooms-list/{buildingId}/rooms/{roomId}":
+    get:
+      tags:
+        - roomsList
+      summary: Provides details about room entry
+      operationId: getRoomEntry
+      description: By using buildingId and roomId, you can get details of a particular room.
+      parameters:
+        - in: path
+          name: buildingId
+          description: Pass the ID of the particular building
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: roomId
+          description: Pass the ID of the particular room
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Value of the room entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomEntry"
+              examples:
+                response:
+                  $ref: "#/components/examples/RoomEntryExample"
+        "404":
+          description: Building or Room with such ID does not exist
+    put:
+      tags:
+        - roomsList
+      summary: Updates specific room entry
+      operationId: updateRoomEntry
+      description: Use this method to update content of the room entry.
+      parameters:
+        - in: path
+          name: buildingId
+          description: Pass the ID of the particular building
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: roomId
+          description: Pass the ID of the particular room
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoomEntry"
+            examples:
+              request:
+                $ref: "#/components/examples/RoomEntryExample"
+        description: Room entry to update
+        required: true
+      responses:
+        "200":
+          description: Value of the room entry with re-computed estimated occupancy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoomEntry"
+              examples:
+                response:
+                  $ref: "#/components/examples/RoomEntryExample"
+        "403":
+          description: Value of the roomId and the data ID is mismatching. Details are provided in the response body.
+        "404":
+          description: Building or Room with such ID does not exist
+    delete:
+      tags:
+        - roomsList
+      summary: Deletes specific room entry
+      operationId: deleteRoomEntry
+      description: Use this method to delete the specific room from the room list.
+      parameters:
+        - in: path
+          name: buildingId
+          description: Pass the ID of the particular building
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: roomId
+          description: Pass the ID of the particular room
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Room deleted
+        "404":
+          description: Building or Room with such ID does not exist 
+components:
+  schemas:
+    RoomEntry:
+      type: object
+      required: [id, type, status, capacity] 
+      properties:
+        id:
+          type: string
+          example: R101
+          description: Unique id of the room in this list
+        type:
+          type: string
+          example: ICU
+          description: Type of the room (e.g., ICU, surgery, general)
+        status:
+          type: string
+          example: Occupied
+          description: Current occupancy status (e.g., Occupied, Available)
+        capacity:
+          type: integer
+          format: int32
+          example: 2
+          description: Number of beds in the room
+  examples:
+    RoomListEntriesExample: 
+      summary: List of rooms in a building
+      description: Example room list containing rooms in a specific building
+      value:
+        - id: R101
+          type: ICU
+          status: Occupied
+          capacity: 1
+        - id: R102
+          type: General
+          status: Available
+          capacity: 4
+    RoomEntryExample:
+      summary: Specific room detail
+      description: Details of a room in the hospital
+      value:
+        id: R101
+        type: ICU
+        status: Occupied
+        capacity: 1
