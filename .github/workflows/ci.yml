@@ -70,7 +70,7 @@ jobs:
       uses: docker/build-push-action@v5.3.0
       with:
         #context: ${GITHUB_WORKSPACE} 
-        file: ${{GITHUB_WORKSPACE}}/build/docker/Dockerfile
+        file: ${{ github.workspace }}/build/docker/Dockerfile
         labels: ${{ steps.meta.outputs.labels }}
         platforms: linux/amd64,linux/arm64/v8
         push: true
