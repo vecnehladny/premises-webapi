@@ -22,11 +22,14 @@ switch ($command) {
         docker run --rm -ti -v ${ProjectRoot}:/local openapitools/openapi-generator-cli generate -c /local/scripts/generator-cfg.yaml
     }
     "start" {
+        try {
             mongo up --detach
             go run ${ProjectRoot}/cmd/ambulance-api-service
+        } finally {
             mongo down
         }
     }
+    "mongo" {
     mongo up
     }
     default {
