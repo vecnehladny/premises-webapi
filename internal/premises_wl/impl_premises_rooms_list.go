@@ -3,23 +3,102 @@ package premises_wl
 import (
 	"net/http"
 
+	"slices"
+
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // Copy following section to separate file, uncomment, and implemented as needed
 // CreateRoomEntry - Saves new room into room list
 func (this *implRoomsListAPI) CreateRoomEntry(ctx *gin.Context) {
-	ctx.AbortWithStatus(http.StatusNotImplemented)
+	updateBuildingFunc(ctx, func(c *gin.Context, building *Building) (*Building, interface{}, int) {
+		var room RoomEntry
+
+		if err := c.ShouldBindJSON(&room); err != nil {
+			return nil, gin.H{
+				"status":  http.StatusBadRequest,
+				"message": "Invalid request body",
+				"error":   err.Error(),
+			}, http.StatusBadRequest
+		}
+
+		if room.Type == "" {
+			return nil, gin.H{
+				"status":  http.StatusBadRequest,
+				"message": "Room type is required",
+			}, http.StatusBadRequest
+		}
+
+		if room.Id == "" || room.Id == "@new" {
+			room.Id = uuid.NewString()
+		}
+
+		conflictIdx := slices.IndexFunc(building.Rooms, func(existingRoom RoomEntry) bool {
+			return room.Id == existingRoom.Id
+		})
+
+		if conflictIdx >= 0 {
+			return nil, gin.H{
+				"status":  http.StatusConflict,
+				"message": "Room already exists",
+			}, http.StatusConflict
+		}
+
+		building.Rooms = append(building.Rooms, room)
+
+		// Since room is copied by value return reconciled value from the list
+		roomIdx := slices.IndexFunc(building.Rooms, func(existingRoom RoomEntry) bool {
+			return room.Id == existingRoom.Id
+		})
+		if roomIdx < 0 {
+			return nil, gin.H{
+				"status":  http.StatusInternalServerError,
+				"message": "Failed to save room",
+			}, http.StatusInternalServerError
+		}
+		return building, building.Rooms[roomIdx], http.StatusOK
+	})
 }
 
 // DeleteRoomEntry - Deletes specific room entry
 func (this *implRoomsListAPI) DeleteRoomEntry(ctx *gin.Context) {
-	ctx.AbortWithStatus(http.StatusNotImplemented)
+	updateBuildingFunc(ctx, func(c *gin.Context, building *Building) (*Building, interface{}, int) {
+		entryId := ctx.Param("entryId")
+
+		if entryId == "" {
+			return nil, gin.H{
+				"status":  http.StatusBadRequest,
+				"message": "Entry ID is required",
+			}, http.StatusBadRequest
+		}
+
+		roomIdx := slices.IndexFunc(building.Rooms, func(existingRoom RoomEntry) bool {
+			return entryId == existingRoom.Id
+		})
+
+		if roomIdx < 0 {
+			return nil, gin.H{
+				"status":  http.StatusNotFound,
+				"message": "Entry not found",
+			}, http.StatusNotFound
+		}
+
+		building.Rooms = append(building.Rooms[:roomIdx], building.Rooms[roomIdx+1:]...)
+		return building, nil, http.StatusNoContent
+	})
 }
 
 // GetRoomEntry - Provides details about room entry
 func (this *implRoomsListAPI) GetRoomEntry(ctx *gin.Context) {
-	ctx.AbortWithStatus(http.StatusNotImplemented)
+	updateBuildingFunc(ctx, func(c *gin.Context, building *Building) (*Building, interface{}, int) {
+		result := building.Rooms
+		if result == nil {
+			result = []RoomEntry{}
+		}
+		// return nil ambulance - no need to update it in db
+		return nil, result, http.StatusOK
+	})
 }
 
 // GetRoomList - Provides the room list for a specific building

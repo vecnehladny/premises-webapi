@@ -14,8 +14,8 @@ info:
 tags:
 - name: roomsList
   description: Hospital Room List API
-- name: roomConditions
-  description: Room conditions and statuses handled in the hospital
+- name: buildings
+  description: building details
 paths:
   "/rooms-list/{buildingId}/rooms":
     get:
@@ -183,6 +183,57 @@ paths:
           description: Room deleted
         "404":
           description: Building or Room with such ID does not exist 
+  "/building":
+    post:
+      tags:
+        - buildings
+      summary: Saves new building definition
+      operationId: createBuilding
+      description: Use this method to initialize a new building in the system.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Building"
+            examples:
+              request-sample:
+                $ref: "#/components/examples/BuildingExample"
+        description: Building details to store
+        required: true
+      responses:
+        "200":
+          description: Value of the stored building
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Building"
+              examples:
+                updated-response:
+                  $ref: "#/components/examples/BuildingExample"
+        "400":
+          description: Missing mandatory properties of the input object.
+        "409":
+          description: Entry with the specified id already exists
+
+  "/building/{buildingId}":
+    delete:
+      tags:
+        - buildings
+      summary: Deletes specific building
+      operationId: deleteBuilding
+      description: Use this method to delete the specific building from the system.
+      parameters:
+        - in: path
+          name: buildingId
+          description: Pass the ID of the particular building
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Building deleted
+        "404":
+          description: Building with such ID does not exist
 components:
   schemas:
     RoomEntry:
@@ -206,6 +257,28 @@ components:
           format: int32
           example: 2
           description: Number of beds in the room
+    Building:
+      type: object
+      required: ["id", "name", "address"]
+      properties:
+        id:
+          type: string
+          example: building-001
+          description: Unique identifier of the building
+        name:
+          type: string
+          example: General Hospital Building A
+          description: Human-readable name of the building
+        address:
+          type: string
+          example: 123 Health St., Meditown
+          description: Physical address of the building
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomEntry'
+      example:
+        $ref: "#/components/examples/BuildingExample"
   examples:
     RoomListEntriesExample: 
       summary: List of rooms in a building
@@ -227,3 +300,20 @@ components:
         type: ICU
         status: Occupied
         capacity: 1
+    BuildingExample:
+      summary: Example of a hospital building
+      description: |
+        Details of Building A at General Hospital which includes various rooms and essential facilities.
+      value:
+        id: building-001
+        name: General Hospital Building A
+        address: "123 Health St., Meditown"
+        rooms:
+          - id: room-101
+            type: General Care
+            status: Available
+            capacity: 4
+          - id: room-102
+            type: Intensive Care Unit
+            status: Occupied
+            capacity: 1

@@ -10,8 +10,8 @@ $ProjectRoot = "${PSScriptRoot}/.."
 
 $env:PREMISES_API_ENVIRONMENT="Development"
 $env:PREMISES_API_PORT="8080"
-$env:AMBULANCE_API_MONGODB_USERNAME="root"
-$env:AMBULANCE_API_MONGODB_PASSWORD="root"
+$env:PREMISES_API_MONGODB_USERNAME="root"
+$env:PREMISES_API_MONGODB_PASSWORD="root"
 
 function mongo {
     docker compose --file ${ProjectRoot}/deployments/docker-compose/compose.yaml $args
@@ -24,7 +24,7 @@ switch ($command) {
     "start" {
         try {
             mongo up --detach
-            go run ${ProjectRoot}/cmd/ambulance-api-service
+            go run ${ProjectRoot}/cmd/premises-api-service
         } finally {
             mongo down
         }

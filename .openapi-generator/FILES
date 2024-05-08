@@ -1,4 +1,6 @@
 internal/premises_wl/README.md
+internal/premises_wl/api_buildings.go
 internal/premises_wl/api_rooms_list.go
+internal/premises_wl/model_building.go
 internal/premises_wl/model_room_entry.go
 internal/premises_wl/routers.go
